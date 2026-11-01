@@ -196,7 +196,7 @@ function installContextWindowIndicator(bindingResolver) {
         }
         entry.binding = binding.ok ? { id: entry.id, host: binding.host, threadId: binding.threadId,
           model: binding.model, bindingVersion: entry.version, changedAt: generation.changedAt, requireFresh: generation.requireFresh } : null;
-        paint(entry, { ...unknown, detail: binding.ok ? '等待当前模型请求统计' : '暂时无法获取当前聊天的用量数据' });
+        paint(entry, { ...unknown, detail: binding.ok ? '等待当前模型请求的统计' : '暂时无法获取当前聊天的用量数据' });
       }
       // Native component: a localized, labelled context-usage image with a ring.
       // Only a visible component inside this composer suppresses our indicator.

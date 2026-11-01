@@ -70,7 +70,7 @@ class ContextWindowReader {
       const snapshot = state.snapshot;
       if (!snapshot || snapshot.model !== binding.model ||
           (binding.requireFresh && !(snapshot.startedAt >= binding.changedAt))) {
-        return { reason: '等待可确认属于当前模型请求的统计' };
+        return { reason: '等待当前模型请求的统计' };
       }
       return { last_token_usage: snapshot.last_token_usage, model_context_window: snapshot.model_context_window };
     } catch {
