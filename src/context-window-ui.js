@@ -47,7 +47,7 @@ function resolveComposerBinding(root) {
 }
 
 function installContextWindowIndicator(bindingResolver) {
-  const KEY = '__codexContextWindow', VERSION = 1, MARK = 'data-codex-context-window';
+  const KEY = '__codexContextWindow', VERSION = 4, MARK = 'data-codex-context-window';
   if (window[KEY]?.version === VERSION) { window[KEY].refresh(); return; }
   window[KEY]?.destroy();
   const entries = new Map();
@@ -58,11 +58,12 @@ function installContextWindowIndicator(bindingResolver) {
   const style = document.createElement('style');
   style.id = 'codex-context-window-style';
   style.textContent = `
-    [${MARK}] { --context-green:#218652; --context-yellow:#ac790b; --context-red:#cf4141; --context-muted:#929898;
-      display:inline-flex;align-items:center;justify-content:center;align-self:center;flex:0 0 24px;
-      width:24px;height:24px;margin:0 6px 0 0;padding:0;box-sizing:border-box;vertical-align:middle;
-      border:0;border-radius:5px;background:transparent;color:var(--context-muted);cursor:default;-webkit-app-region:no-drag; }
+    [${MARK}] { --context-green:#218652; --context-yellow:#ac790b; --context-red:#cf4141; --context-muted:#929898; --context-hover:#0000000a;
+      display:inline-flex;align-items:center;justify-content:center;align-self:center;flex:0 0 28px;
+      width:28px;height:28px;margin:0 6px 0 0;padding:0;box-sizing:border-box;vertical-align:middle;
+      border:0;border-radius:999px;background:transparent;color:var(--context-muted);cursor:default;-webkit-app-region:no-drag; }
     [${MARK}][hidden] {display:none!important}
+    [${MARK}]:hover,[${MARK}]:focus-visible {background:var(--context-hover)}
     [${MARK}]:focus-visible {outline:2px solid currentColor;outline-offset:1px}
     [${MARK}] svg {width:14px;height:14px;display:block;overflow:visible;flex:none}
     [${MARK}] circle {fill:none;stroke-width:2}
@@ -72,19 +73,26 @@ function installContextWindowIndicator(bindingResolver) {
     [${MARK}][data-tone="yellow"] {color:var(--context-yellow)}
     [${MARK}][data-tone="red"] {color:var(--context-red)}
     [${MARK}][data-tone="muted"] .context-track {opacity:.65}
-    html.dark [${MARK}],html[data-theme="dark"] [${MARK}] {--context-green:#54c58c;--context-yellow:#e5b54c;--context-red:#ef7777;--context-muted:#8a9393}
-    #codex-context-window-tooltip {position:fixed;z-index:2147483647;max-width:calc(100vw - 16px);padding:8px 10px;
-      box-sizing:border-box;border-radius:8px;background:var(--color-surface-elevated-secondary,#fff);color:var(--color-text-primary,#242424);
-      box-shadow:0 3px 18px #0003;font:12px/1.6 system-ui,sans-serif;white-space:pre-line;pointer-events:none}
+    html.dark [${MARK}],html[data-theme="dark"] [${MARK}] {--context-green:#54c58c;--context-yellow:#e5b54c;--context-red:#ef7777;--context-muted:#8a9393;--context-hover:#ffffff14}
+    #codex-context-window-tooltip {position:fixed;z-index:2147483647;max-width:calc(100vw - 16px);padding:6px 12px;
+      box-sizing:border-box;border:1px solid color-mix(in srgb,currentColor 5%,transparent);border-radius:14px;
+      background:var(--color-surface-tooltip,#fff);color:var(--color-text-tooltip,var(--color-text-primary,#242424));
+      box-shadow:0 4px 16px #0002;font:12px/18px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      white-space:normal;overflow-wrap:anywhere;pointer-events:none;-webkit-app-region:no-drag}
+    #codex-context-window-tooltip .context-tooltip-label {display:block;font-size:14px;line-height:20px;font-weight:600}
+    #codex-context-window-tooltip .context-tooltip-detail {display:block;margin-top:2px;opacity:.8;white-space:pre-line}
     #codex-context-window-tooltip[hidden] {display:none}
-    html.dark #codex-context-window-tooltip,html[data-theme="dark"] #codex-context-window-tooltip {background:var(--color-surface-elevated-secondary,#2c2e2c);color:var(--color-text-primary,#edf0ed)}
-    @media(prefers-color-scheme:dark) {html:not(.light):not([data-theme="light"]) [${MARK}] {--context-green:#54c58c;--context-yellow:#e5b54c;--context-red:#ef7777;--context-muted:#8a9393}
-      html:not(.light):not([data-theme="light"]) #codex-context-window-tooltip {background:var(--color-surface-elevated-secondary,#2c2e2c);color:var(--color-text-primary,#edf0ed)}}
+    html.dark #codex-context-window-tooltip,html[data-theme="dark"] #codex-context-window-tooltip {background:var(--color-surface-tooltip,#262626);color:var(--color-text-tooltip,#f5f5f5)}
+    @media(prefers-color-scheme:dark) {html:not(.light):not([data-theme="light"]) [${MARK}] {--context-green:#54c58c;--context-yellow:#e5b54c;--context-red:#ef7777;--context-muted:#8a9393;--context-hover:#ffffff14}
+      html:not(.light):not([data-theme="light"]) #codex-context-window-tooltip {background:var(--color-surface-tooltip,#262626);color:var(--color-text-tooltip,#f5f5f5)}}
     @media(prefers-reduced-motion:reduce) {[${MARK}] .context-progress {transition:none}}
   `;
   document.head.append(style);
   const tooltip = document.createElement('div');
   tooltip.id = 'codex-context-window-tooltip'; tooltip.role = 'tooltip'; tooltip.hidden = true;
+  const tooltipLabel = document.createElement('span'), tooltipDetail = document.createElement('span');
+  tooltipLabel.className = 'context-tooltip-label'; tooltipDetail.className = 'context-tooltip-detail';
+  tooltip.append(tooltipLabel, document.createTextNode('\n'), tooltipDetail);
   document.body.append(tooltip);
   function visible(node) {
     return node?.isConnected && node.getBoundingClientRect().width > 0 && node.getBoundingClientRect().height > 0 &&
@@ -94,7 +102,8 @@ function installContextWindowIndicator(bindingResolver) {
   function showTooltip(entry) {
     if (disposed || entry.node.hidden || !visible(entry.node)) return;
     active = entry;
-    tooltip.textContent = `${entry.value.label}\n${entry.value.detail}`;
+    tooltipLabel.textContent = entry.value.label;
+    tooltipDetail.textContent = entry.value.detail;
     tooltip.hidden = false;
     const rect = entry.node.getBoundingClientRect(), bounds = tooltip.getBoundingClientRect();
     tooltip.style.left = `${Math.max(8, Math.min(innerWidth - bounds.width - 8, rect.x + rect.width / 2 - bounds.width / 2))}px`;
