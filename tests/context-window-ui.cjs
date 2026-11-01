@@ -68,7 +68,7 @@ async function update(page, requested, values = [38, 90]) {
         return {width: r.width, height: r.height, svgWidth: svg.width, svgHeight: svg.height, gap: b.left - r.right,
           aligned: Math.abs(b.y + b.height / 2 - r.y - r.height / 2) < .5, contained: r.x >= root.x && b.right < root.right};
       }));
-      for (const g of geometry) assert.deepEqual(g, {width: 24, height: 24, svgWidth: 14, svgHeight: 14, gap: 6, aligned: true, contained: true});
+      for (const g of geometry) assert.deepEqual(g, {width: 28, height: 28, svgWidth: 14, svgHeight: 14, gap: 6, aligned: true, contained: true});
     }
     const ring = page.locator(mark).first(), tooltip = page.locator('#codex-context-window-tooltip');
     await ring.hover(); await page.waitForTimeout(100); assert.equal(await tooltip.isVisible(), false);
