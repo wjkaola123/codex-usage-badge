@@ -5,7 +5,7 @@ const {compareVersions,selectRelease,verifyArchive,checkForUpdate,getBytes,INTER
 const data=Buffer.from('synthetic Windows archive');
 const hash=crypto.createHash('sha256').update(data).digest('hex');
 function release(version,extra={}) {
-  const tag='v'+version+'-windows',base='https://github.com/jaykinhoo9/codex-usage-badge/releases/download/'+tag+'/';
+  const tag='v'+version+'-windows',base='https://github.com/wjkaola123/codex-usage-badge/releases/download/'+tag+'/';
   return {tag_name:tag,published_at:'2026-01-01T00:00:00Z',draft:false,assets:[
     {name:`CodexUsageBadge-Windows-${version}.zip`,state:'uploaded',size:data.length,digest:'sha256:'+hash,browser_download_url:base+`CodexUsageBadge-Windows-${version}.zip`},
     {name:'SHA256SUMS.txt',state:'uploaded',size:130,browser_download_url:base+'SHA256SUMS.txt'}
@@ -30,6 +30,9 @@ function server(releases,{badHash=false,error=false}={}) {
   assert.throws(()=>compareVersions('garbage','0.10.1'));
   const wrong=release('5.0.0');wrong.assets[0].browser_download_url='https://example.invalid/update.zip';
   assert.equal(selectRelease([release('0.10.2'),release('0.10.10'),release('9.0.0',{draft:true}),release('8.0.0',{tag_name:'v8.0.0-macos'}),release('7.0.0',{published_at:null}),wrong,release('6.0.0',{assets:[]})],'0.10.1').version,'0.10.10');
+  const upstream=release('9.0.0');
+  for(const asset of upstream.assets)asset.browser_download_url=asset.browser_download_url.replace('wjkaola123/','jaykinhoo9/');
+  assert.equal(selectRelease([upstream],'0.10.1'),null);
   assert.equal(selectRelease([release('0.10.1')],'0.10.1'),null);
   const candidate=selectRelease([release('0.10.2')],'0.10.1'),manifest=Buffer.from(`${hash}  ${candidate.asset.name}\n`);
   assert.equal(verifyArchive(data,manifest,candidate),hash);
@@ -39,6 +42,7 @@ function server(releases,{badHash=false,error=false}={}) {
   let installs=0,records=[];const api=server([release('0.10.2')]);
   const options={current:'0.10.1',fetcher:api.fetcher,record:async value=>records.push(value),now:()=>100000000,installPackage:async payload=>{assert.equal(payload.hash,hash);assert.equal(payload.version,'0.10.2');assert.deepEqual(payload.data,data);installs++;}};
   assert.equal((await checkForUpdate(options)).event,'updated');
+  assert.equal(api.requests[0],'https://api.github.com/repos/wjkaola123/codex-usage-badge/releases?per_page=100');
   assert.equal(installs,1);assert.deepEqual(records.map(v=>v.event),['checking','installing','updated']);assert.equal(api.requests.length,3);
   assert.equal((await checkForUpdate({...options,state:records.at(-1)})).event,'not-due');assert.equal(api.requests.length,3);
   const offline=server([],{error:true});records=[];

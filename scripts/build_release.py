@@ -42,7 +42,7 @@ for target_platform in platforms:
             generated[filename] = f'#!/bin/bash\nexec /bin/bash "$(dirname "$0")/scripts/mac-entry.sh" {action}\n'.encode()
             modes[filename] = 0o755
     else:
-        mapping.update({'manage-windows.ps1':'windows/manage-windows.ps1','bridge.cjs':'windows/bridge.cjs','update.cjs':'windows/update.cjs','update-windows.ps1':'windows/update-windows.ps1','README-Windows.md':'docs/windows.md'})
+        mapping.update({'docs/context-window.md':'docs/context-window.md','assets/context-window.png':'assets/context-window.png','manage-windows.ps1':'windows/manage-windows.ps1','bridge.cjs':'windows/bridge.cjs','update.cjs':'windows/update.cjs','update-windows.ps1':'windows/update-windows.ps1','README-Windows.md':'docs/windows.md'})
         for filename in ['controller.cjs','windows.cjs','windows-bridge.ps1','windows-native.cs']:
             mapping['startup/'+filename] = 'startup/'+filename
         for action in ['Install','Launch','Status','Uninstall','Update']:

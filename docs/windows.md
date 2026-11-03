@@ -1,6 +1,6 @@
 # Windows 使用说明
 
-## 原图标自动加载（Windows 0.10.1 预发布）
+## 原图标自动加载（Windows 0.10.2 预发布）
 
 完整解压 Windows ZIP 后，运行 `Install.cmd`。首次安装前先打开并登录客户端，使内置运行组件准备好；安装后从托盘或菜单完全退出，再使用原来的 Codex 图标打开。安装时已经打开的窗口会保留。
 
@@ -24,6 +24,8 @@ Windows 通过 Raw Input 观察实际操作：点击、滚轮或按键会取消�
 `Install.cmd` / `Launch.cmd` / `Status.cmd` / `Uninstall.cmd` 仅为本次 PowerShell 进程设置执行策略，不更改注册表或企业策略。脚本没有代码签名；设备策略禁止时请联系管理员。
 
 ## 自动更新（Windows 0.10.1 起）
+
+本分支 v0.10.2 起检查 `wjkaola123/codex-usage-badge` 的 Windows Release。此前安装的上游版本仍检查原仓库，需要手动安装一次本分支版本后才能跟随后续更新。
 
 安装后默认开启。后台首次启动约 30 秒后检查 GitHub，之后每 6 小时检查一次；Windows 登录后台需要保持启用。只下载本仓库已发布且版本更高的 Windows Release，不使用 macOS 发布包或仅推送的源码提交。
 
